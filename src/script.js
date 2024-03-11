@@ -9,10 +9,12 @@ import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 const gui = new GUI();
 
 const controlObject = {
-  text: "Hello, Donuts",
+  text: "Chrome Donuts",
 };
 
-// Canvas
+let textGoemetryHolder = [];
+
+//  Canvas
 const canvas = document.querySelector("canvas.webgl");
 
 // Scene
@@ -21,7 +23,7 @@ const scene = new THREE.Scene();
 // Textures
 const textureLoader = new THREE.TextureLoader();
 const matcapTexture1 = textureLoader.load(
-  "/textures/matcaps/6D1616_E6CDBA_DE2B24_230F0F-256px.png"
+  "/textures/matcaps/6D1616_E6CDBA_DE2B24_230F0F-256px.png",
 );
 matcapTexture1.colorSpace = THREE.SRGBColorSpace;
 const matcapTexture2 = textureLoader.load("/textures/matcaps/3.png");
@@ -36,6 +38,7 @@ const fontLoader = new FontLoader();
 
 function buildText() {
   fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
+    textGoemetryHolder = [];
     // Text
     const textGeometry = new TextGeometry(controlObject.text, {
       font: font,
@@ -50,20 +53,28 @@ function buildText() {
     });
     textGeometry.center();
     const text = new THREE.Mesh(textGeometry, textMaterial);
-    // console.log("text inside the fontLoader callback", text);
+
     scene.add(text);
+    textGoemetryHolder.push(text);
   });
 }
 
 buildText();
 
-// console.log("text outside", text);
-
 gui.add(controlObject, "text").onFinishChange((newVal) => {
   controlObject.text = newVal;
-  console.log(controlObject.text);
+  // console.log(controlObject.text);
+  disposeText();
   buildText();
 });
+
+function disposeText() {
+  textGoemetryHolder.forEach((element) => {
+    scene.remove(element);
+    element.geometry.dispose();
+    element.material.dispose();
+  });
+}
 
 // Donuts
 const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 32, 64);
@@ -108,11 +119,11 @@ const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
   0.1,
-  100
+  100,
 );
-camera.position.x = 1;
-camera.position.y = 1;
-camera.position.z = 2;
+camera.position.x = 0;
+camera.position.y = 0;
+camera.position.z = 4;
 scene.add(camera);
 
 // Controls
